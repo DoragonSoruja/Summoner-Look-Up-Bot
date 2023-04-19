@@ -1,5 +1,11 @@
 import discord
 import responses
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+Discord_Bot_Token = os.getenv("Discord_Bot_Token")
 
 async def send_message(message, user_message, is_private):
     try:
@@ -10,7 +16,7 @@ async def send_message(message, user_message, is_private):
         print(e)
 
 def run_discord_bot():
-    TOKEN = 'MTA5Nzk5MzA4MTIxNjgzNTU4NA.G4DSK2.UxigU8ag65vGBIfNV0hfKcY7R-BjpYpViJ9B7E'
+    TOKEN = Discord_Bot_Token
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
@@ -33,7 +39,8 @@ def run_discord_bot():
         if user_message[0] == '?':
             user_message = user_message[1:]
             await send_message(message, user_message, is_private=True)
-        else:
+        elif user_message[0] == '!':
+            user_message = user_message[1:]
             await send_message(message, user_message, is_private=False)
 
     client.run(TOKEN)
