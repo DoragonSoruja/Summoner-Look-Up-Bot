@@ -76,10 +76,20 @@ async def lolProfile(ctx, summonerName = None):
     second_info = second_api.text
     summonerInfoByID = json.loads(second_info)
 
-    embed = discord.Embed(title=summonerInfo['name'], description="A simple League of Legends profile", color=discord.Color.random())
+    embed = discord.Embed(title=summonerInfo['name'], description=f"The League profile of {summonerInfo['name']}", color=discord.Color.random())
     embed.set_thumbnail(url=f"https://ddragon.leagueoflegends.com/cdn/{GetLatestVersion()}/img/profileicon/{summonerInfo['profileIconId']}.png")
-    embed.add_field(name="__Level__", value=summonerInfo['summonerLevel'], inline=True)
-    embed.add_field(name="__Rank__", value=f"{summonerInfoByID[0]['tier']} {summonerInfoByID[0]['rank']}", inline="true")
+    embed.add_field(name="__Level__", value=summonerInfo['summonerLevel'], inline=False)
+
+    try:
+        embed.add_field(name="__Solo Rank__", value=f"{summonerInfoByID[0]['tier']} {summonerInfoByID[0]['rank']}", inline=True)
+    except:
+        embed.add_field(name="__Solo Rank__", value="Unranked", inline=True)
+
+    try:
+        embed.add_field(name="__Flex Rank__", value=f"{summonerInfoByID[1]['tier']} {summonerInfoByID[1]['rank']}", inline=True)
+    except:
+        embed.add_field(name="__Flex Rank__", value="Unranked", inline=True)
+
     embed.set_footer(text=f"{ctx.author} has requested this information")
 
     await ctx.send(embed=embed)
