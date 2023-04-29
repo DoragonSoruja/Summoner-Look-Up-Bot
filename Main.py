@@ -1,12 +1,17 @@
 import random
 import discord
+from version import GetLatestVersion
 from discord.ext import commands
 from dotenv import load_dotenv
 import os
+import requests
+import json
+
 
 load_dotenv()
 
 Discord_Token = os.getenv("Discord_Token")
+api_key = os.getenv("Riot_Key")
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 
@@ -40,5 +45,43 @@ async def eightball(ctx, *, question = None):
                  "Yes.", "Yes - definitely.", "You may rely on it."]
     await ctx.send(f"**Question: **{question}\n**Answer:** {random.choice(responses)}")
 
+@bot.command()
+async def embed(ctx, member:discord.Member = None):
+    if member == None:
+        member = ctx.author
+
+    name = member.display_name
+    pfp = member.display_avatar
+
+    embed = discord.Embed(title="This is my Embed", description="This is a test embed, I'm gonna change the information later", color=discord.Color.random())
+    embed.set_author(name=f"{name}")
+    embed.set_thumbnail(url=f"{pfp}")
+    embed.add_field(name="This is 1 field", value="This field is just a value")
+    embed.add_field(name="This is 2 field", value="This field is inline True", inline=True)
+    embed.add_field(name="This is 3 field", value="This field is inline False", inline=False)
+    embed.set_footer(text=f"{name} made this Embed")
+
+    await ctx.send(embed=embed)
+
+@bot.command(aliases=['lol'])
+async def lolProfile(ctx, summonerName = None):
+    if summonerName == None:
+        await ctx.send("Please enter a Summoner Name.")
+
+    api = requests.get(f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}?api_key={api_key}')
+    info = api.text
+    summonerInfo = json.loads(info)
+
+    second_api = requests.get(f"https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerInfo['id']}?api_key={api_key}")
+    second_info = second_api.text
+    summonerInfoByID = json.loads(second_info)
+
+    embed = discord.Embed(title=summonerInfo['name'], description="A simple League of Legends profile", color=discord.Color.random())
+    embed.set_thumbnail(url=f"https://ddragon.leagueoflegends.com/cdn/{GetLatestVersion()}/img/profileicon/{summonerInfo['profileIconId']}.png")
+    embed.add_field(name="__Level__", value=summonerInfo['summonerLevel'], inline=True)
+    embed.add_field(name="__Rank__", value=f"{summonerInfoByID[0]['tier']} {summonerInfoByID[0]['rank']}", inline="true")
+    embed.set_footer(text=f"{ctx.author} has requested this information")
+
+    await ctx.send(embed=embed)
 
 bot.run(Discord_Token)
