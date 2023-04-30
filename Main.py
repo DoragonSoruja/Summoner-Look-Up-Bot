@@ -59,9 +59,12 @@ async def lolProfile(ctx, summonerName = None):
     info = api.text
     summonerInfo = json.loads(info)
 
-    second_api = requests.get(f"https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerInfo['id']}?api_key={api_key}")
-    second_info = second_api.text
-    summonerInfoByID = json.loads(second_info)
+    try:
+        second_api = requests.get(f"https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerInfo['id']}?api_key={api_key}")
+        second_info = second_api.text
+        summonerInfoByID = json.loads(second_info)
+    except:
+        await ctx.send("Please enter in a valid summoner name.")
 
     embed = discord.Embed(title=summonerInfo['name'], description=f"The League profile of {summonerInfo['name']}", color=discord.Color.random())
     embed.set_thumbnail(url=f"https://ddragon.leagueoflegends.com/cdn/{GetLatestVersion()}/img/profileicon/{summonerInfo['profileIconId']}.png")
@@ -80,5 +83,34 @@ async def lolProfile(ctx, summonerName = None):
     embed.set_footer(text=f"{ctx.author} has requested this information")
 
     await ctx.send(embed=embed)
+
+@bot.command()
+async def lastMatch(ctx, summonerName = None):
+    if summonerName == None:
+        await ctx.send("Please enter a Summoner Name.")
+
+    api = requests.get(f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}?api_key={api_key}')
+    info = api.text
+    summonerInfo = json.loads(info)
+
+    second_api = requests.get(f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{summonerInfo['puuid']}/ids?start=0&count=20&api_key={api_key}")
+    second_info = second_api.text
+    matchRecords = json.loads(second_info)
+
+    third_api = requests.get(f'https://americas.api.riotgames.com/lol/match/v5/matches/{matchRecords[0]}?api_key={api_key}')
+    third_info = third_api.text
+    latestMatch = json.loads(third_info)
+
+    allPlayers = latestMatch['info']['participants']
+
+    targetedPlayer = None
+
+    for playerInfo in allPlayers:
+        if playerInfo['summonerName'].lower() == summonerName.lower():
+            targetedPlayer = playerInfo
+
+    # Implement the rest of the command
+
+    await ctx.send(targetedPlayer['championName'])
 
 bot.run(Discord_Token)
