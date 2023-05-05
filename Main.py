@@ -1,5 +1,4 @@
 import random
-import math
 from datetime import datetime
 import discord
 from version import GetLatestVersion
@@ -58,16 +57,16 @@ async def lolProfile(ctx, summonerName = None):
         await ctx.send("Please enter a Summoner Name.")
         return
 
-    api = requests.get(f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}?api_key={api_key}')
-    info = api.text
+    summonerapi = requests.get(f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}?api_key={api_key}')
+    info = summonerapi.text
     summonerInfo = json.loads(info)
 
     try:
-        second_api = requests.get(f"https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerInfo['id']}?api_key={api_key}")
-        second_info = second_api.text
-        summonerInfoByID = json.loads(second_info)
+        summonerstatsapi = requests.get(f"https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerInfo['id']}?api_key={api_key}")
+        info = summonerstatsapi.text
+        summonerInfoByID = json.loads(info)
     except:
-        await ctx.send('Please enter in a valid summoner name.\n(If you summoner name contains a space, put it in double quotation marks `"Summoner Name"`)')
+        await ctx.send('Please enter in a valid summoner name.\n(If your summoner name contains a space, put it in double quotation marks `"Summoner Name"`)')
         return
 
     embed = discord.Embed(title=summonerInfo['name'], description=f"The League profile of {summonerInfo['name']}", color=discord.Color.random())
@@ -94,21 +93,21 @@ async def lastMatch(ctx, summonerName = None):
         await ctx.send("Please enter a Summoner Name.")
         return
 
-    api = requests.get(f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}?api_key={api_key}')
-    info = api.text
+    summonerapi = requests.get(f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}?api_key={api_key}')
+    info = summonerapi.text
     summonerInfo = json.loads(info)
 
     try:
-        second_api = requests.get(f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{summonerInfo['puuid']}/ids?start=0&count=20&api_key={api_key}")
-        second_info = second_api.text
-        matchRecords = json.loads(second_info)
+        matchesapi = requests.get(f"https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{summonerInfo['puuid']}/ids?start=0&count=20&api_key={api_key}")
+        info = matchesapi.text
+        matchesinfo = json.loads(info)
     except:
-        await ctx.send('Please enter in a valid summoner name.\n(If you summoner name contains a space, put it in double quotation marks `"Summoner Name"`)')
+        await ctx.send('Please enter in a valid summoner name.\n(If your summoner name contains a space, put it in double quotation marks `"Summoner Name"`)')
         return
 
-    third_api = requests.get(f'https://americas.api.riotgames.com/lol/match/v5/matches/{matchRecords[0]}?api_key={api_key}')
-    third_info = third_api.text
-    latestMatch = json.loads(third_info)
+    matchapi = requests.get(f'https://americas.api.riotgames.com/lol/match/v5/matches/{matchesinfo[0]}?api_key={api_key}')
+    matchinfo = matchapi.text
+    latestMatch = json.loads(matchinfo)
 
     allPlayers = latestMatch['info']['participants']
 
@@ -141,6 +140,44 @@ async def lastMatch(ctx, summonerName = None):
     embed.add_field(name="__KDA__", value=f"{KDA}", inline=True)
     embed.add_field(name="__Damage Dealt__", value=f"{targetedPlayer['totalDamageDealtToChampions']}", inline=True)
     embed.add_field(name="__Match Status__", value=f"{matchStatus}", inline=False)
+
+    await ctx.send(embed=embed)
+
+@bot.command(aliases=['top5'])
+async def mastery(ctx, summonerName = None):
+    if summonerName == None:
+        await ctx.send("Please enter in a summoner name")
+        return
+
+    summonerAPI = requests.get(f'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summonerName}?api_key={api_key}')
+    info = summonerAPI.text
+    summonerInfo = json.loads(info)
+
+    try:
+        masteryAPI = requests.get(f"https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{summonerInfo['id']}?api_key={api_key}")
+        info = masteryAPI.text
+        masteryInfo = json.loads(info)
+    except:
+        await ctx.send('Please enter in a valid summoner name.\n(If your summoner name contains a space, put it in double quotation marks `"Summoner Name"`)')
+        return
+
+    championAPI = requests.get(f"http://ddragon.leagueoflegends.com/cdn/{GetLatestVersion()}/data/en_US/champion.json")
+    data = championAPI.text
+    championInfo = json.loads(data)
+
+    embed = discord.Embed(title="Top 5 Mastery", description=f"{summonerName}'s top 5 champions", color=discord.Color.blue())
+    embed.set_thumbnail(url=f"https://ddragon.leagueoflegends.com/cdn/{GetLatestVersion()}/img/profileicon/{summonerInfo['profileIconId']}.png")
+
+    for x in range(5):
+        for champ in championInfo['data']:
+            if championInfo['data'][champ]["key"] == f"{masteryInfo[x]['championId']}":
+                 embed.add_field(name="__Champion__", value=champ)
+       
+        embed.add_field(name="__Mastery__", value=f"M{masteryInfo[x]['championLevel']} - {masteryInfo[x]['championPoints']}pts")
+
+        date = datetime.fromtimestamp(masteryInfo[x]['lastPlayTime'] / 1000).strftime("%m/%d/%y")
+
+        embed.add_field(name="__Last Played__", value=f"{date}")
 
     await ctx.send(embed=embed)
 
