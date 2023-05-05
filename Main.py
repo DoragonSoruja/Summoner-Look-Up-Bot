@@ -21,16 +21,6 @@ bot.remove_command('help')
 async def on_ready():
     print(f"{bot.user} Is Online")
 
-@bot.event
-async def on_member_join(member):
-    channel = member.guild.system_channel
-    await channel.send(f"{member.mention} Welcome to the server")
-
-@bot.event
-async def on_member_remove(member):
-    channel = member.guild.system_channel
-    await channel.send(f"Goodbye! {member.mention}")
-
 @bot.command()
 async def ping(ctx):
     await ctx.reply(f"Pong! {round(bot.latency * 1000)}ms")
@@ -49,7 +39,7 @@ async def eightball(ctx, *, question = None):
 
 @bot.command()
 async def help(ctx):
-    await ctx.send("**!help** - Brings up the help menu full of all the commands\n\n**!eightball** - A simple eightball command that gives back several different answer\n`Alias: 8ball`\n\n**!lolProfile <Summoner Name>** - Uses the Riot API to get the level and rank\n`Alias: lol`\n\n**!lastMatch <Summoner Name>** - Gives you stats on the last match played.\n`Alias: last`\n\nMore commands might be added soon. If you have any ideas, please suggest them to the bot creator.")
+    await ctx.send("**!help** - Brings up the help menu full of all the commands\n\n**!eightball** - A simple eightball command that gives back several different answer\n`Alias: 8ball`\n\n**!lolProfile <Summoner Name>** - Uses the Riot API to get the level and rank\n`Alias: lol`\n\n**!lastMatch <Summoner Name>** - Gives you stats on the last match played.\n`Alias: last`\n\n**!lolProfile <Summoner Name>** - Uses the Riot API to get the level and rank\n`Alias: lol`\n\n**!mastery <Summoner Name>** - Gives back a list of a summoner's top five champions played orginized by mastery points.\n`Alias: top5`\n\nMore commands might be added soon. If you have any ideas, please suggest them to the bot creator.")
 
 @bot.command(aliases=['lol'])
 async def lolProfile(ctx, summonerName = None):
@@ -172,7 +162,7 @@ async def mastery(ctx, summonerName = None):
         for champ in championInfo['data']:
             if championInfo['data'][champ]["key"] == f"{masteryInfo[x]['championId']}":
                  embed.add_field(name="__Champion__", value=champ)
-       
+
         embed.add_field(name="__Mastery__", value=f"M{masteryInfo[x]['championLevel']} - {masteryInfo[x]['championPoints']}pts")
 
         date = datetime.fromtimestamp(masteryInfo[x]['lastPlayTime'] / 1000).strftime("%m/%d/%y")
