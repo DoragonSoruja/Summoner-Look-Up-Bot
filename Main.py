@@ -39,7 +39,7 @@ async def eightball(ctx, *, question = None):
 
 @bot.command()
 async def help(ctx):
-    await ctx.send("**!help** - Brings up the help menu full of all the commands\n\n**!eightball** - A simple eightball command that gives back several different answer\n`Alias: 8ball`\n\n**!lolProfile <Summoner Name>** - Uses the Riot API to get the level and rank\n`Alias: lol`\n\n**!lastMatch <Summoner Name>** - Gives you stats on the last match played.\n`Alias: last`\n\n**!lolProfile <Summoner Name>** - Uses the Riot API to get the level and rank\n`Alias: lol`\n\n**!mastery <Summoner Name>** - Gives back a list of a summoner's top five champions played orginized by mastery points.\n`Alias: top5`\n\nMore commands might be added soon. If you have any ideas, please suggest them to the bot creator.")
+    await ctx.send("**!help** - Brings up the help menu with all the commands\n\n**!eightball** - A simple eightball command that gives back several different answer\n`Alias: 8ball`\n\n**!lolProfile <Summoner Name>** - Uses the Riot API to get the level and rank\n`Alias: lol`\n\n**!lastMatch <Summoner Name>** - Gives you stats on the last match played.\n`Alias: last`\n\n**!mastery <Summoner Name>** - Gives back a list of a summoner's top five champions played organized by mastery points.\n`Alias: top5`\n\nMore commands might be added soon. If you have any ideas, please suggest them to the bot creator.")
 
 @bot.command(aliases=['lol'])
 async def lolProfile(ctx, summonerName = None):
