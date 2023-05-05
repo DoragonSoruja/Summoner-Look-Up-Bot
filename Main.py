@@ -63,15 +63,14 @@ async def lolProfile(ctx, summonerName = None):
     embed.set_thumbnail(url=f"https://ddragon.leagueoflegends.com/cdn/{GetLatestVersion()}/img/profileicon/{summonerInfo['profileIconId']}.png")
     embed.add_field(name="__Level__", value=summonerInfo['summonerLevel'], inline=False)
 
-    try:
-        embed.add_field(name="__Solo Rank__", value=f"{summonerInfoByID[0]['tier']} {summonerInfoByID[0]['rank']}", inline=True)
-    except:
-        embed.add_field(name="__Solo Rank__", value="Unranked", inline=True)
+    for summonerStats in summonerInfoByID:
+        if summonerStats["queueType"] == "RANKED_SOLO_5x5":
+            embed.add_field(name="__Solo Rank__", value=f"{summonerStats['tier']} {summonerStats['rank']}", inline=True)
 
-    try:
-        embed.add_field(name="__Flex Rank__", value=f"{summonerInfoByID[1]['tier']} {summonerInfoByID[1]['rank']}", inline=True)
-    except:
-        embed.add_field(name="__Flex Rank__", value="Unranked", inline=True)
+
+    for summonerStats in summonerInfoByID:
+        if summonerStats["queueType"] == "RANKED_FLEX_SR":
+            embed.add_field(name="__Flex Rank__", value=f"{summonerStats['tier']} {summonerStats['rank']}", inline=True)
 
     embed.set_footer(text=f"{ctx.author} has requested this information")
 
